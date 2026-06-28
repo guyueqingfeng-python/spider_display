@@ -4,13 +4,12 @@ import requests
 import os
 import hashlib
 
-from huggingface_hub.cli.inference_endpoints import update
 from lxml import etree
 import re
 import random
 import shutil
-
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.remote.webelement import WebElement
@@ -28,7 +27,7 @@ def bass_logging():
     console.setLevel(logging.INFO)
     logger.addHandler(console)
 
-def logging_configuration(name, level=logging.INFO, error=None, log_dir="logging", fmt=None):
+def logging_configuration(name, level=logging.INFO, error=True, log_dir="logging", fmt=None):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     if logger.handlers:
@@ -298,6 +297,24 @@ def wait_page_form(wait, by, value, max_attempts):
     logger.error("页面加载错误")
     raise NoSuchElementException("页面加载错误")
 
+
+def get_by(config):
+    by_map = {
+        "id": By.ID,
+        "class_name": By.CLASS_NAME,
+        "xpath": By.XPATH,
+        "name": By.NAME,
+        "css": By.CSS_SELECTOR,
+        "tag_name": By.TAG_NAME,
+        "link_text": By.LINK_TEXT,
+        "partial_link_text": By.PARTIAL_LINK_TEXT,
+    }
+
+    by_type = by_map.get(config["by"])
+    if not by_type:
+        raise ValueError(f"不支持的定位方式: {config['by']}")
+
+    return (by_type, config["value"])
 
 def file_duplication_process(path, start_num = 1):
     fold = os.path.dirname(path)
